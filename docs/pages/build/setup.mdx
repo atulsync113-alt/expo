@@ -1,188 +1,412 @@
----
-title: Create your first build
-description: Learn how to create a build for your app with EAS Build.
----
-
-import { Collapsible } from '~/ui/components/Collapsible';
-import { Prerequisites, Requirement } from '~/ui/components/Prerequisites';
-import { Terminal } from '~/ui/components/Snippet';
-import { Step } from '~/ui/components/Step';
-import { Tabs, Tab } from '~/ui/components/Tabs';
-import { A } from '~/ui/components/Text';
-
-EAS Build allows you to build a ready-to-submit binary of your app for the Google Play Store or Apple App Store. In this guide, let's learn how to do that.
-
-Alternatively, if you prefer to install the app directly to your Android device/emulator or install it in the iOS Simulator, we will point you toward resources that explain how to do that.
-
-For a small app, builds for Android and iOS platforms trigger within a few minutes. If you encounter any issues along the way, you can reach out on <A href="https://chat.expo.dev/" shouldLeakReferrer>Discord and Forums</A>.
-
-> **info** EAS Build is a rapidly evolving service. Before you set out to create a build for your project we recommend consulting the [limitations](/build-reference/limitations) and the other prerequisites below.
-
-<Prerequisites>
-  <Requirement title="A React Native Android or iOS project">
-    Don't have a project yet? It's quick and easy to create a "Hello world" app you can use with this guide:
-
-    <Terminal cmd={['$ npx create-expo-app@latest my-app --template default@sdk-56']} />
-
-    EAS Build also works well with projects created by `npx create-react-native-app`, `npx react-native`, `ignite-cli`, and other project bootstrapping tools.
-
-  </Requirement>
-  <Requirement title="An Expo account">
-    EAS Build is available to anyone with an Expo account, regardless of whether you pay for EAS or use the Free plan. You can sign up at [expo.dev](https://expo.dev/signup).
-
-    Paid subscribers get quality improvements such as additional build concurrencies, priority access to minimize the time your builds spend queueing, and increased limits on build timeouts. Learn more about different plans and benefits at [EAS pricing](https://expo.dev/pricing).
-
-  </Requirement>
-</Prerequisites>
-
-<Step label="1">
-## Install the latest EAS CLI
-
-EAS CLI is the command-line app that you will use to interact with EAS services from your terminal. To install it, run the command:
-
-<Terminal cmd={['$ npm install -g eas-cli']} />
-
-You can also use the above command to check if a new version of EAS CLI is available. We encourage you to always stay up to date with the latest version.
-
-> We recommend using `npm` instead of `yarn` for global package installations. You may alternatively use `npx eas-cli@latest`. Remember to use that instead of `eas` whenever it's called for in the documentation.
-
-</Step>
-
-<Step label="2">
-## Log in to your Expo account
-
-If you are already signed in to an Expo account using Expo CLI, you can skip the steps described in this section. If you are not, run the following command to log in:
-
-<Terminal cmd={['$ eas login']} />
-
-You can check whether you are logged in by running `eas whoami`.
-
-</Step>
-
-<Step label="3">
-## Configure the project
-
-To configure an Android or an iOS project for EAS Build, run the following command:
-
-<Terminal cmd={['$ eas build:configure']} />
-
-To learn more about what happens behind the scenes, see [build configuration process reference](/build-reference/build-configuration).
-
-For development, we recommend creating a [development build](/develop/development-builds/introduction/), which is a debug build of your app and contains the [`expo-dev-client`](/versions/latest/sdk/dev-client/) library. It helps you iterate as quickly as possible and provides a more flexible, reliable, and complete development environment. To install the library, run the following command:
-
-<Terminal cmd={['$ npx expo install expo-dev-client']} />
-
-Additional configuration may be required for some scenarios:
-
-- Does your app code depend on environment variables? [Add them to your build configuration](/eas/environment-variables).
-- Is your project inside of a monorepo? [Follow these instructions](/build-reference/build-with-monorepos).
-- Do you use private npm packages? [Add your npm token](/build-reference/private-npm-packages).
-- Does your app depend on specific versions of tools like Node, Yarn, npm, CocoaPods, or Xcode? [Specify these versions in your build configuration](/build/eas-json).
-
-</Step>
-
-<Step label="4">
-## Run a build
-
-### Build for Android Emulator/device or iOS Simulator
-
-The easiest way to try out EAS Build is to create a build that you can run on your Android device/emulator or iOS Simulator. It's quicker than uploading it to a store, and you don't need store developer membership accounts. If you'd like to try this, read about [creating an installable APK for Android](/tutorial/eas/android-development-build/) and [creating a simulator build for iOS](/tutorial/eas/ios-development-build-for-simulators/).
-
-### Build for app stores
-
-Before the build process can start for app stores, you will need to have a store developer account and generate or provide app signing credentials.
-
-Whether you have experience with generating app signing credentials or not, EAS CLI does the heavy lifting. You can opt-in for EAS CLI to handle the app signing credentials process. Check out the steps for [Android app signing credentials](#android-app-signing-credentials) or [iOS app signing credentials](#ios-app-signing-credentials) process below for more information.
-
-<Collapsible summary="Google Play Developer membership is required to distribute to the Google Play Store.">
-
-You can build and sign your app using EAS Build, but you can't upload it to the Google Play Store unless you have a membership, a one-time $25 USD fee.
-
-</Collapsible>
-
-<Collapsible summary="Apple Developer Program membership is required to build for the Apple App Store.">
-
-If you are going to use EAS Build to create release builds for the Apple App Store, you need access to an account with a $99 USD [Apple Developer Program](https://developer.apple.com/programs) membership.
-
-</Collapsible>
-
-After you have confirmed that you have a Google Play Store or Apple App Store account and decided whether or not EAS CLI should handle app signing credentials, you can proceed with the following set of commands to build for the platform's store:
-
-<Tabs tabs={['Android', 'iOS']}>
-  <Tab>
-    <Terminal cmd={['$ eas build --platform android']} />
-  </Tab>
-  <Tab>
-    <Terminal cmd={['$ eas build --platform ios']} />
-  </Tab>
-</Tabs>
-
-> You can attach a message to the build by passing `--message` to the build command, for example, `eas build --platform ios --message "Some message"`. The message will appear on the website. It comes in handy when you want to leave a note with the purpose of the build for your team.
-
-Alternatively, you can use `--platform all` option to build for Android and iOS at the same time:
-
-<Terminal cmd={['$ eas build --platform all']} />
-
-> If you have released your app to stores previously and have existing [app signing credentials](/app-signing/app-credentials/) that you want to use, [follow these instructions to configure them](/app-signing/existing-credentials).
-
-#### Android app signing credentials
-
-- If you have not yet generated a keystore for your app, you can let EAS CLI take care of that for you by selecting `Generate new keystore`, and then you are done. The keystore is stored securely on EAS servers.
-- If you have previously built your app with `expo build:android`, you can use the same credentials here.
-- If you want to manually generate your keystore, see the [manual Android credentials guide](/app-signing/local-credentials#android-credentials) for more information.
-
-#### iOS app signing credentials
-
-- If you have not generated a provisioning profile and/or distribution certificate yet, you can let EAS CLI take care of that for you by signing into your Apple Developer Program account and following the prompts.
-- If you have already built your app with `expo build:ios`, you can use the same credentials here.
-- If you want to rather manually generate your credentials, refer to the [manual iOS credentials guide](/app-signing/local-credentials#ios-credentials) for more information.
-
-</Step>
-
-<Step label="5">
-## Wait for the build to complete
-
-By default, the `eas build` command will wait for your build to complete, but you can interrupt it if you prefer not to wait. Monitor the progress and read the logs by following the link to the build details page that EAS CLI prompts once the build process gets started. You can also find this page by visiting [your build dashboard](https://expo.dev/builds) or running the following command:
-
-<Terminal cmd={['$ eas build:list']} />
-
-If you are a member of an organization and your build is on its behalf, you will find the build details on [the build dashboard for that account](https://expo.dev/accounts/[account]/builds).
-
-> **Did your build fail?** Double check that you followed any applicable instructions in the [configuration step](#3-configure-the-project) and refer to the [troubleshooting guide](/build-reference/troubleshooting) if needed.
-
-</Step>
-
-<Step label="6">
-## Deploy the build
-
-If you have made it to this step, congratulations! Depending on which path you chose, you now either have a build that is ready to upload to an app store, or you have a build that you can install directly on an Android device/iOS Simulator.
-
-### Distribute your app to an app store
-
-You will only be able to submit to an app store if you built specifically for that purpose. If you created a build for a store, [learn how to submit your app to app stores with EAS Submit](/submit/introduction).
-
-### Install and run the app
-
-You will only be able to install the app directly to your Android device/iOS Simulator if you explicitly built it for that purpose. If you built for app store distribution, you will need to upload to an app store and then install it from there (for example, from Apple's TestFlight app).
-
-To learn how to install the app directly to your Android device/iOS Simulator, navigate to your build details page from [your build dashboard](https://expo.dev/accounts/[account]/builds) and click the "Install" button.
-
-</Step>
-
-## Next steps
-
-We walked you through the steps to create your first build with EAS Build without going into too much depth on any particular part of the process.
-
-When you are ready to learn more, we recommend proceeding through the following topics to learn more:
-
-- [Configuration with eas.json](/build/eas-json)
-- [Internal distribution](/build/internal-distribution)
-- [Updates](/build/updates)
-- [Automating submissions](/build/automate-submissions)
-- [Triggering builds from CI](/build/building-on-ci)
-
-You may also want to dig through the reference section to learn more about the topics that interest you most, such as:
-
-- [Build webhooks](/eas/webhooks)
-- [Build server infrastructure](/build-reference/infrastructure)
-- How the [Android](/build-reference/android-builds) and [iOS](/build-reference/ios-builds) build processes work
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, Dimensions, FlatList, TouchableOpacity, SafeAreaView, StatusBar, TextInput, Modal, Share, ScrollView, Platform, Alert } from 'react-native';
+import * as DocumentPicker from 'expo-document-picker';
+import * as MediaLibrary from 'expo-media-library';
+
+const { height, width } = Dimensions.get('window');
+
+const VIDEO_FEED = [
+  { id: '1', title: 'Trending Indie Track 🎵', user: '@creator_one', likes: 12400, comments: 340 },
+  { id: '2', title: 'Viral Synth-Pop 🚀', user: '@music_hustler', likes: 45000, comments: 1200 },
+  { id: '3', title: 'Desi Hip-Hop Drop 🔥', user: '@desi_beats', likes: 8500, comments: 210 },
+];
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('Home');
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFileUri, setSelectedFileUri] = useState(null);
+  const [caption, setCaption] = useState('');
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profile, setProfile] = useState({
+    name: 'Tech Creator',
+    handle: '@tech_creator',
+    bio: 'Welcome to my channel! Subscribe for daily coding shorts and tech reviews. 🚀💻'
+  });
+  const [editForm, setEditForm] = useState(profile);
+
+  // --- HOME SCREEN ---
+  const VideoItem = ({ item }) => {
+    const [isLiked, setIsLiked] = useState(false);
+    const [showComments, setShowComments] = useState(false);
+    const [newComment, setNewComment] = useState('');
+    const [commentsList, setCommentsList] = useState([
+      { id: 'c1', user: 'User123', text: 'This track is fire! 🔥' },
+      { id: 'c2', user: 'DesiBeats', text: 'Need this audio ASAP.' },
+      { id: 'c3', user: 'MusicLover', text: 'When is the full release?' }
+    ]);
+
+    const handleShare = async () => {
+      try {
+        await Share.share({
+          message: `Check out this amazing video: ${item.title} by ${item.user}! Watch it on the app now. 🔥`,
+        });
+      } catch (error) {
+        Alert.alert('Error', 'Error sharing: ' + error.message);
+      }
+    };
+
+    const handlePostComment = () => {
+      if (newComment.trim().length > 0) {
+        setCommentsList([...commentsList, {
+          id: Date.now().toString(),
+          user: 'You',
+          text: newComment.trim(),
+        }]);
+        setNewComment('');
+      }
+    };
+
+    return (
+      <View style={styles.videoContainer}>
+        <View style={styles.videoPlayerMock}>
+          <Text style={styles.videoMockText}>▶</Text>
+          <Text style={styles.videoMockSubText}>Playing Track...</Text>
+        </View>
+
+        <View style={styles.interactionBar}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => setIsLiked(!isLiked)}>
+            <Text style={styles.iconText}>{isLiked ? '❤️' : '🤍'}</Text>
+            <Text style={styles.iconSubText}>{isLiked ? item.likes + 1 : item.likes}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton} onPress={() => setShowComments(true)}>
+            <Text style={styles.iconText}>💬</Text>
+            <Text style={styles.iconSubText}>{item.comments + commentsList.length - 3}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton} onPress={handleShare}>
+            <Text style={styles.iconText}>↗️</Text>
+            <Text style={styles.iconSubText}>Share</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.bottomInfo}>
+          <Text style={styles.username}>{item.user}</Text>
+          <Text style={styles.songTitle}>♫ {item.title}</Text>
+        </View>
+
+        <Modal visible={showComments} transparent={true} animationType="slide">
+          <View style={styles.modalBackground}>
+            <View style={styles.commentsSheet}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Comments ({item.comments + commentsList.length - 3})</Text>
+                <TouchableOpacity onPress={() => setShowComments(false)}>
+                  <Text style={styles.closeText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+              <FlatList
+                data={commentsList}
+                keyExtractor={(c) => c.id}
+                showsVerticalScrollIndicator={false}
+                style={styles.commentListArea}
+                renderItem={({ item: commentItem }) => (
+                  <Text style={styles.commentText}>
+                    <Text style={styles.commentUsername}>{commentItem.user}: </Text>
+                    {commentItem.text}
+                  </Text>
+                )}
+              />
+              <View style={styles.commentInputRow}>
+                <TextInput
+                  style={styles.commentInput}
+                  placeholder="Add a comment..."
+                  placeholderTextColor="#888"
+                  value={newComment}
+                  onChangeText={setNewComment}
+                />
+                <TouchableOpacity style={styles.postCommentBtn} onPress={handlePostComment}>
+                  <Text style={styles.postCommentBtnText}>Post</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      </View>
+    );
+  };
+
+  const renderHome = () => (
+    <FlatList
+      data={VIDEO_FEED}
+      keyExtractor={item => item.id}
+      pagingEnabled={true}
+      showsVerticalScrollIndicator={false}
+      renderItem={({ item }) => <VideoItem item={item} />}
+    />
+  );
+
+  // --- UPLOAD STUDIO WITH REAL FILE PICKER ---
+  const requestPermissionAndPick = async () => {
+    try {
+      // Request media library permission (needed on Android for storage access)
+      if (Platform.OS === 'android') {
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status === 'denied') {
+          Alert.alert(
+            'Permission Required',
+            'Storage permission is needed to select audio files. Please enable it in your device Settings > Apps > [App Name] > Permissions.',
+            [{ text: 'OK' }]
+          );
+          return;
+        }
+      }
+
+      // Open the native file picker
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['audio/*', 'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/m4a', 'audio/ogg'],
+        copyToCacheDirectory: true,   // copies file to app cache so it's accessible
+        multiple: false,
+      });
+
+      console.log('Picker result:', JSON.stringify(result));
+
+      // Handle result — Expo SDK 49+ uses result.assets array
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const file = result.assets[0];
+        setSelectedFile(file.name || 'Selected Audio File');
+        setSelectedFileUri(file.uri);
+        Alert.alert('✅ File Selected', `File: ${file.name}\nSize: ${file.size ? (file.size / 1024).toFixed(1) + ' KB' : 'Unknown'}`);
+      
+      // Fallback for older Expo SDK (result.type === 'success')
+      } else if (result.type === 'success') {
+        setSelectedFile(result.name || 'Selected Audio File');
+        setSelectedFileUri(result.uri);
+        Alert.alert('✅ File Selected', `File: ${result.name}`);
+      
+      } else {
+        // User cancelled — do nothing silently
+        console.log('User cancelled file picker');
+      }
+
+    } catch (error) {
+      console.error('File picker error:', error);
+      Alert.alert('Error', 'Could not open file picker: ' + error.message);
+    }
+  };
+
+  const handleSimulatedUpload = () => {
+    if (!selectedFile) {
+      Alert.alert('No File', 'Please select an MP3/Audio file first!');
+      return;
+    }
+    setIsUploading(true);
+    setUploadProgress(0);
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 10;
+      setUploadProgress(progress);
+      if (progress >= 100) {
+        clearInterval(interval);
+        setTimeout(() => {
+          setIsUploading(false);
+          Alert.alert('🎉 Success', 'Audio Uploaded Successfully!');
+          setSelectedFile(null);
+          setSelectedFileUri(null);
+          setCaption('');
+          setActiveTab('Home');
+        }, 500);
+      }
+    }, 300);
+  };
+
+  const renderUpload = () => (
+    <ScrollView style={styles.studioContainer} keyboardShouldPersistTaps="handled">
+      <Text style={styles.pageHeader}>Upload New Track</Text>
+
+      {/* File Picker Button */}
+      <TouchableOpacity style={styles.uploadBox} onPress={requestPermissionAndPick} activeOpacity={0.7}>
+        <Text style={styles.uploadIcon}>{selectedFile ? '🎵' : '📁'}</Text>
+        <Text style={styles.uploadText}>
+          {selectedFile ? `✅ ${selectedFile}` : 'Tap to Browse & Select Audio File'}
+        </Text>
+        {!selectedFile && (
+          <Text style={styles.uploadSubText}>Supports MP3, WAV, M4A, OGG</Text>
+        )}
+      </TouchableOpacity>
+
+      {/* Clear selection button */}
+      {selectedFile && (
+        <TouchableOpacity
+          style={styles.clearBtn}
+          onPress={() => { setSelectedFile(null); setSelectedFileUri(null); }}
+        >
+          <Text style={styles.clearBtnText}>✕ Remove Selected File</Text>
+        </TouchableOpacity>
+      )}
+
+      <TextInput
+        style={styles.captionInput}
+        placeholder="Write a catchy caption for your track..."
+        placeholderTextColor="#888"
+        multiline
+        value={caption}
+        onChangeText={setCaption}
+      />
+
+      {isUploading ? (
+        <View style={styles.progressContainer}>
+          <Text style={styles.progressText}>Uploading... {uploadProgress}%</Text>
+          <View style={styles.progressBarBg}>
+            <View style={[styles.progressBarFill, { width: `${uploadProgress}%` }]} />
+          </View>
+        </View>
+      ) : (
+        <TouchableOpacity
+          style={[styles.publishButton, !selectedFile && styles.publishButtonDisabled]}
+          onPress={handleSimulatedUpload}
+          activeOpacity={selectedFile ? 0.8 : 1}
+        >
+          <Text style={styles.publishButtonText}>
+            {selectedFile ? '🚀 Publish Track' : 'Select a file to publish'}
+          </Text>
+        </TouchableOpacity>
+      )}
+    </ScrollView>
+  );
+
+  // --- PROFILE TAB ---
+  const saveProfileSettings = () => {
+    setProfile(editForm);
+    setIsEditingProfile(false);
+  };
+
+  const renderProfile = () => (
+    <ScrollView style={styles.studioContainer}>
+      <Text style={styles.pageHeader}>My Channel</Text>
+      <View style={styles.profileHeader}>
+        <View style={styles.avatarPlaceholder}>
+          <Text style={styles.avatarText}>{profile.name.charAt(0)}</Text>
+        </View>
+        <View style={styles.statsContainer}>
+          <View style={styles.statBox}>
+            <Text style={styles.statNumber}>124</Text>
+            <Text style={styles.statLabel}>Tracks</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statNumber}>14.2K</Text>
+            <Text style={styles.statLabel}>Subscribers</Text>
+          </View>
+        </View>
+      </View>
+
+      {isEditingProfile ? (
+        <View style={styles.editProfileArea}>
+          <Text style={styles.inputLabel}>Display Name</Text>
+          <TextInput style={styles.profileInput} value={editForm.name} onChangeText={(text) => setEditForm({...editForm, name: text})} />
+          <Text style={styles.inputLabel}>Channel Handle</Text>
+          <TextInput style={styles.profileInput} value={editForm.handle} onChangeText={(text) => setEditForm({...editForm, handle: text})} />
+          <Text style={styles.inputLabel}>Channel Bio</Text>
+          <TextInput style={[styles.profileInput, { height: 80, textAlignVertical: 'top' }]} value={editForm.bio} onChangeText={(text) => setEditForm({...editForm, bio: text})} multiline />
+          <TouchableOpacity style={styles.saveProfileBtn} onPress={saveProfileSettings}>
+            <Text style={styles.saveProfileText}>Save Changes</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.cancelProfileBtn} onPress={() => setIsEditingProfile(false)}>
+            <Text style={styles.cancelProfileText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={styles.viewProfileArea}>
+          <Text style={styles.profileNameDisplay}>{profile.name}</Text>
+          <Text style={styles.profileHandleDisplay}>{profile.handle}</Text>
+          <Text style={styles.profileBioDisplay}>{profile.bio}</Text>
+          <TouchableOpacity style={styles.editProfileBtn} onPress={() => setIsEditingProfile(true)}>
+            <Text style={styles.editProfileText}>✏️ Customize Channel</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </ScrollView>
+  );
+
+  // --- BOTTOM NAV ---
+  const NavBar = () => (
+    <View style={styles.navBar}>
+      {['Home', 'Upload', 'Profile'].map((tab) => (
+        <TouchableOpacity key={tab} onPress={() => setActiveTab(tab)} style={styles.navItem}>
+          <Text style={[styles.navText, activeTab === tab && styles.navTextActive]}>
+            {tab === 'Upload' ? '➕ Create' : tab}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={styles.mainContainer}>
+      <StatusBar barStyle="light-content" />
+      <View style={styles.contentArea}>
+        {activeTab === 'Home' && renderHome()}
+        {activeTab === 'Upload' && renderUpload()}
+        {activeTab === 'Profile' && renderProfile()}
+      </View>
+      <NavBar />
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  mainContainer: { flex: 1, backgroundColor: '#000' },
+  contentArea: { flex: 1 },
+  videoContainer: { height: height - 80, width: width, justifyContent: 'center', backgroundColor: '#000', position: 'relative' },
+  videoPlayerMock: { flex: 1, backgroundColor: '#111', justifyContent: 'center', alignItems: 'center' },
+  videoMockText: { color: '#333', fontSize: 60 },
+  videoMockSubText: { color: '#333', fontSize: 16, marginTop: 10, fontWeight: 'bold' },
+  interactionBar: { position: 'absolute', right: 10, bottom: 100, alignItems: 'center' },
+  iconButton: { marginBottom: 20, alignItems: 'center' },
+  iconText: { fontSize: 30 },
+  iconSubText: { color: '#fff', marginTop: 4, fontWeight: 'bold', fontSize: 12 },
+  bottomInfo: { position: 'absolute', bottom: 20, left: 15 },
+  username: { color: '#fff', fontWeight: 'bold', fontSize: 16, marginBottom: 8 },
+  songTitle: { color: '#fff', fontSize: 14 },
+  modalBackground: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },
+  commentsSheet: { backgroundColor: '#1a1a1a', height: height * 0.6, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, paddingBottom: 40 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20, borderBottomWidth: 1, borderBottomColor: '#333', paddingBottom: 10 },
+  modalTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+  closeText: { color: '#ff4081', fontWeight: 'bold', fontSize: 16 },
+  commentListArea: { flex: 1, marginBottom: 15 },
+  commentText: { color: '#ddd', fontSize: 15, marginBottom: 15 },
+  commentUsername: { fontWeight: 'bold', color: '#fff' },
+  commentInputRow: { flexDirection: 'row', alignItems: 'center', borderTopWidth: 1, borderTopColor: '#333', paddingTop: 15 },
+  commentInput: { flex: 1, backgroundColor: '#2a2a2a', color: '#fff', borderRadius: 25, paddingHorizontal: 15, height: 45, marginRight: 10 },
+  postCommentBtn: { padding: 10 },
+  postCommentBtnText: { color: '#ff4081', fontWeight: 'bold', fontSize: 16 },
+  studioContainer: { flex: 1, backgroundColor: '#050505', padding: 20, paddingTop: 40 },
+  pageHeader: { color: '#fff', fontSize: 28, fontWeight: 'bold', marginBottom: 20 },
+  uploadBox: { minHeight: 180, backgroundColor: '#1e1e1e', borderRadius: 15, justifyContent: 'center', alignItems: 'center', borderStyle: 'dashed', borderWidth: 2, borderColor: '#444', marginBottom: 12, padding: 20 },
+  uploadIcon: { fontSize: 40, marginBottom: 10 },
+  uploadText: { color: '#aaa', fontSize: 15, textAlign: 'center', marginBottom: 6 },
+  uploadSubText: { color: '#555', fontSize: 13, textAlign: 'center' },
+  clearBtn: { alignSelf: 'flex-end', marginBottom: 12, padding: 6 },
+  clearBtnText: { color: '#ff4081', fontSize: 13 },
+  captionInput: { backgroundColor: '#1e1e1e', color: '#fff', borderRadius: 10, padding: 15, height: 100, textAlignVertical: 'top', marginBottom: 20 },
+  publishButton: { backgroundColor: '#ff4081', padding: 15, borderRadius: 10, alignItems: 'center' },
+  publishButtonDisabled: { backgroundColor: '#555' },
+  publishButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 18 },
+  progressContainer: { marginTop: 20 },
+  progressText: { color: '#fff', marginBottom: 10, fontWeight: 'bold', textAlign: 'center' },
+  progressBarBg: { height: 12, backgroundColor: '#333', borderRadius: 6, overflow: 'hidden' },
+  progressBarFill: { height: '100%', backgroundColor: '#ff4081' },
+  profileHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 25 },
+  avatarPlaceholder: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#ff4081', justifyContent: 'center', alignItems: 'center', marginRight: 20 },
+  avatarText: { color: '#fff', fontSize: 32, fontWeight: 'bold' },
+  statsContainer: { flexDirection: 'row', flex: 1, justifyContent: 'space-around' },
+  statBox: { alignItems: 'center' },
+  statNumber: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
+  statLabel: { color: '#888', fontSize: 14, marginTop: 4 },
+  viewProfileArea: { marginTop: 10 },
+  profileNameDisplay: { color: '#fff', fontSize: 24, fontWeight: 'bold' },
+  profileHandleDisplay: { color: '#ff4081', fontSize: 16, marginBottom: 15 },
+  profileBioDisplay: { color: '#ccc', fontSize: 15, lineHeight: 22, marginBottom: 25 },
+  editProfileBtn: { backgroundColor: '#222', padding: 15, borderRadius: 10, alignItems: 'center' },
+  editProfileText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  editProfileArea: { marginTop: 10 },
+  inputLabel: { color: '#888', fontSize: 14, marginBottom: 8, marginLeft: 5 },
+  profileInput: { backgroundColor: '#1e1e1e', color: '#fff', borderRadius: 10, padding: 15, marginBottom: 20, fontSize: 16 },
+  saveProfileBtn: { backgroundColor: '#ff4081', padding: 15, borderRadius: 10, alignItems: 'center', marginBottom: 10 },
+  saveProfileText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  cancelProfileBtn: { backgroundColor: 'transparent', padding: 15, borderRadius: 10, alignItems: 'center' },
+  cancelProfileText: { color: '#888', fontWeight: 'bold', fontSize: 16 },
+  navBar: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', height: 80, backgroundColor: '#000', borderTopWidth: 1, borderTopColor: '#222', paddingBottom: 20 },
+  navItem: { flex: 1, alignItems: 'center', padding: 10 },
+  navText: { color: '#888', fontSize: 14, fontWeight: 'bold' },
+  navTextActive: { color: '#fff', fontSize: 16 },
+});
